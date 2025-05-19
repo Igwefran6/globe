@@ -1,1085 +1,349 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Polished Animated Globe</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Optimized Globe</title>
     <style>
-        body {
-            background: linear-gradient(135deg, #1a2a6c, #1f4e5f, #2d8e6d);
-            min-height: 100vh;
-            overflow: hidden;
-        }
+      .globe-container {
+        position: relative;
+        width: 400px;
+        height: 400px;
+        perspective: 1200px;
+        margin: 0 auto;
+      }
 
-        .globe-container {
-            position: relative;
-            width: 400px;
-            height: 400px;
-            perspective: 1200px;
-        }
+      .globe {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        animation: rotate 40s linear infinite;
+      }
 
-        .globe {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            transform-style: preserve-3d;
-            animation: rotate 30s linear infinite;
+      @keyframes rotate {
+        0% {
+          transform: rotateY(0deg) rotateX(-10deg);
         }
+        100% {
+          transform: rotateY(360deg) rotateX(-10deg);
+        }
+      }
 
-        @keyframes rotate {
-            0% {
-                transform: rotateY(0deg) rotateX(-10deg);
-            }
-            100% {
-                transform: rotateY(360deg) rotateX(-10deg);
-            }
-        }
+      .dot {
+        position: absolute;
+        border-radius: 50%;
+        transform-style: preserve-3d;
+      }
 
-        .dot {
-            position: absolute;
-            border-radius: 50%;
-            transform-style: preserve-3d;
-        }
+      .continent-dot {
+        background-color: rgba(255, 255, 255, 0.9);
+        width: 4px;
+        height: 4px;
+        box-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+      }
 
-        .continent-dot {
-            background-color: rgba(255, 255, 255, 0.9);
-            width: 4px;
-            height: 4px;
-            box-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
-        }
+      .ocean-dot {
+        background-color: rgba(255, 255, 255, 0.4);
+        width: 2px;
+        height: 2px;
+      }
 
-        .ocean-dot {
-            background-color: rgba(255, 255, 255, 0.4);
-            width: 2px;
-            height: 2px;
-        }
+      .pointer {
+        position: absolute;
+        transform-style: preserve-3d;
+        z-index: 10;
+      }
 
-        .pointer {
-            position: absolute;
-            transform-style: preserve-3d;
-            animation: pulse 3s infinite;
-            z-index: 10;
-        }
+      .pointer-dot {
+        width: 10px;
+        height: 10px;
+        background-color: #2ecc71;
+        border-radius: 50%;
+        box-shadow: 0 0 8px #2ecc71;
+      }
 
-        .pointer-dot {
-            width: 12px;
-            height: 12px;
-            background-color: #2ecc71;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #2ecc71;
-        }
-
-        .pointer-pulse {
-            position: absolute;
-            top: -4px;
-            left: -4px;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background-color: rgba(46, 204, 113, 0.3);
-            animation: expand 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
-
-        @keyframes expand {
-            0% {
-                transform: scale(0.5);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(2);
-                opacity: 0;
-            }
-        }
-
-        .pointer-label {
-            position: absolute;
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-            white-space: nowrap;
-            text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
-            transform: translateX(15px) translateY(-5px);
-        }
+      .pointer-label {
+        position: absolute;
+        color: white;
+        font-size: 11px;
+        font-weight: bold;
+        white-space: nowrap;
+        text-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
+        transform: translateX(12px) translateY(-5px);
+      }
     </style>
-</head>
-
-<body>
-    <div class="flex items-center justify-center min-h-screen">
-        <div class="globe-container">
-            <div class="globe" id="globe"></div>
-        </div>
+  </head>
+  <body>
+    <div class="globe-container">
+      <div class="globe" id="globe"></div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const globe = document.getElementById('globe');
-            const radius = 180;
-            const oceanDotCount = 800;
+      document.addEventListener("DOMContentLoaded", function () {
+        const globe = document.getElementById("globe");
+        const radius = 180;
+        const oceanDotCount = 500; // Reduced for better performance
 
-            // More detailed continent outlines with smoother curves
-            const continentData = {
-                northAmerica: [{
-                        lat: 83,
-                        lng: -75
-                    }, {
-                        lat: 78,
-                        lng: -76
-                    }, {
-                        lat: 74,
-                        lng: -95
-                    }, {
-                        lat: 69,
-                        lng: -130
-                    },
-                    {
-                        lat: 71,
-                        lng: -156
-                    }, {
-                        lat: 68,
-                        lng: -165
-                    }, {
-                        lat: 65,
-                        lng: -168
-                    }, {
-                        lat: 60,
-                        lng: -165
-                    },
-                    {
-                        lat: 57,
-                        lng: -170
-                    }, {
-                        lat: 50,
-                        lng: -130
-                    }, {
-                        lat: 48,
-                        lng: -124
-                    }, {
-                        lat: 40,
-                        lng: -124
-                    },
-                    {
-                        lat: 33,
-                        lng: -118
-                    }, {
-                        lat: 28,
-                        lng: -114
-                    }, {
-                        lat: 23,
-                        lng: -106
-                    }, {
-                        lat: 19,
-                        lng: -104
-                    },
-                    {
-                        lat: 16,
-                        lng: -95
-                    }, {
-                        lat: 14,
-                        lng: -92
-                    }, {
-                        lat: 16,
-                        lng: -88
-                    }, {
-                        lat: 21,
-                        lng: -87
-                    },
-                    {
-                        lat: 26,
-                        lng: -82
-                    }, {
-                        lat: 25,
-                        lng: -80
-                    }, {
-                        lat: 27,
-                        lng: -80
-                    }, {
-                        lat: 31,
-                        lng: -81
-                    },
-                    {
-                        lat: 35,
-                        lng: -75
-                    }, {
-                        lat: 40,
-                        lng: -74
-                    }, {
-                        lat: 43,
-                        lng: -70
-                    }, {
-                        lat: 45,
-                        lng: -67
-                    },
-                    {
-                        lat: 48,
-                        lng: -69
-                    }, {
-                        lat: 51,
-                        lng: -57
-                    }, {
-                        lat: 53,
-                        lng: -56
-                    }, {
-                        lat: 56,
-                        lng: -61
-                    },
-                    {
-                        lat: 59,
-                        lng: -64
-                    }, {
-                        lat: 63,
-                        lng: -68
-                    }, {
-                        lat: 66,
-                        lng: -67
-                    }, {
-                        lat: 69,
-                        lng: -68
-                    },
-                    {
-                        lat: 74,
-                        lng: -78
-                    }, {
-                        lat: 79,
-                        lng: -74
-                    }, {
-                        lat: 83,
-                        lng: -75
-                    }
-                ],
-                southAmerica: [{
-                        lat: 14,
-                        lng: -83
-                    }, {
-                        lat: 10,
-                        lng: -85
-                    }, {
-                        lat: 8,
-                        lng: -78
-                    }, {
-                        lat: 9,
-                        lng: -75
-                    },
-                    {
-                        lat: 12,
-                        lng: -73
-                    }, {
-                        lat: 11,
-                        lng: -68
-                    }, {
-                        lat: 10,
-                        lng: -66
-                    }, {
-                        lat: 8,
-                        lng: -60
-                    },
-                    {
-                        lat: 5,
-                        lng: -55
-                    }, {
-                        lat: 2,
-                        lng: -50
-                    }, {
-                        lat: -2,
-                        lng: -48
-                    }, {
-                        lat: -8,
-                        lng: -35
-                    },
-                    {
-                        lat: -12,
-                        lng: -38
-                    }, {
-                        lat: -19,
-                        lng: -40
-                    }, {
-                        lat: -22,
-                        lng: -43
-                    }, {
-                        lat: -28,
-                        lng: -48
-                    },
-                    {
-                        lat: -34,
-                        lng: -58
-                    }, {
-                        lat: -40,
-                        lng: -63
-                    }, {
-                        lat: -43,
-                        lng: -65
-                    }, {
-                        lat: -50,
-                        lng: -74
-                    },
-                    {
-                        lat: -55,
-                        lng: -68
-                    }, {
-                        lat: -50,
-                        lng: -75
-                    }, {
-                        lat: -42,
-                        lng: -73
-                    }, {
-                        lat: -33,
-                        lng: -72
-                    },
-                    {
-                        lat: -25,
-                        lng: -71
-                    }, {
-                        lat: -18,
-                        lng: -70
-                    }, {
-                        lat: -13,
-                        lng: -76
-                    }, {
-                        lat: -5,
-                        lng: -81
-                    },
-                    {
-                        lat: 0,
-                        lng: -80
-                    }, {
-                        lat: 7,
-                        lng: -78
-                    }, {
-                        lat: 10,
-                        lng: -80
-                    }, {
-                        lat: 14,
-                        lng: -83
-                    }
-                ],
-                europe: [{
-                        lat: 71,
-                        lng: 25
-                    }, {
-                        lat: 68,
-                        lng: 20
-                    }, {
-                        lat: 65,
-                        lng: 22
-                    }, {
-                        lat: 60,
-                        lng: 30
-                    },
-                    {
-                        lat: 60,
-                        lng: 40
-                    }, {
-                        lat: 55,
-                        lng: 40
-                    }, {
-                        lat: 50,
-                        lng: 40
-                    }, {
-                        lat: 45,
-                        lng: 40
-                    },
-                    {
-                        lat: 40,
-                        lng: 30
-                    }, {
-                        lat: 38,
-                        lng: 27
-                    }, {
-                        lat: 36,
-                        lng: 30
-                    }, {
-                        lat: 36,
-                        lng: 23
-                    },
-                    {
-                        lat: 38,
-                        lng: 20
-                    }, {
-                        lat: 40,
-                        lng: 19
-                    }, {
-                        lat: 42,
-                        lng: 16
-                    }, {
-                        lat: 43,
-                        lng: 13
-                    },
-                    {
-                        lat: 44,
-                        lng: 8
-                    }, {
-                        lat: 43,
-                        lng: 5
-                    }, {
-                        lat: 41,
-                        lng: 2
-                    }, {
-                        lat: 43,
-                        lng: -2
-                    },
-                    {
-                        lat: 43,
-                        lng: -6
-                    }, {
-                        lat: 43,
-                        lng: -9
-                    }, {
-                        lat: 47,
-                        lng: -7
-                    }, {
-                        lat: 48,
-                        lng: -5
-                    },
-                    {
-                        lat: 50,
-                        lng: -4
-                    }, {
-                        lat: 54,
-                        lng: -10
-                    }, {
-                        lat: 58,
-                        lng: -8
-                    }, {
-                        lat: 60,
-                        lng: -5
-                    },
-                    {
-                        lat: 62,
-                        lng: -10
-                    }, {
-                        lat: 65,
-                        lng: -15
-                    }, {
-                        lat: 65,
-                        lng: -22
-                    }, {
-                        lat: 70,
-                        lng: -24
-                    },
-                    {
-                        lat: 72,
-                        lng: -20
-                    }, {
-                        lat: 72,
-                        lng: -10
-                    }, {
-                        lat: 71,
-                        lng: 0
-                    }, {
-                        lat: 71,
-                        lng: 25
-                    }
-                ],
-                africa: [{
-                        lat: 35,
-                        lng: -10
-                    }, {
-                        lat: 35,
-                        lng: -5
-                    }, {
-                        lat: 37,
-                        lng: 10
-                    }, {
-                        lat: 32,
-                        lng: 15
-                    },
-                    {
-                        lat: 32,
-                        lng: 25
-                    }, {
-                        lat: 30,
-                        lng: 32
-                    }, {
-                        lat: 27,
-                        lng: 34
-                    }, {
-                        lat: 22,
-                        lng: 37
-                    },
-                    {
-                        lat: 15,
-                        lng: 39
-                    }, {
-                        lat: 12,
-                        lng: 43
-                    }, {
-                        lat: 12,
-                        lng: 45
-                    }, {
-                        lat: 8,
-                        lng: 49
-                    },
-                    {
-                        lat: 4,
-                        lng: 45
-                    }, {
-                        lat: 0,
-                        lng: 42
-                    }, {
-                        lat: -5,
-                        lng: 39
-                    }, {
-                        lat: -10,
-                        lng: 40
-                    },
-                    {
-                        lat: -15,
-                        lng: 40
-                    }, {
-                        lat: -20,
-                        lng: 40
-                    }, {
-                        lat: -25,
-                        lng: 35
-                    }, {
-                        lat: -30,
-                        lng: 30
-                    },
-                    {
-                        lat: -34,
-                        lng: 20
-                    }, {
-                        lat: -34,
-                        lng: 18
-                    }, {
-                        lat: -30,
-                        lng: 17
-                    }, {
-                        lat: -25,
-                        lng: 15
-                    },
-                    {
-                        lat: -20,
-                        lng: 12
-                    }, {
-                        lat: -15,
-                        lng: 12
-                    }, {
-                        lat: -10,
-                        lng: 13
-                    }, {
-                        lat: -5,
-                        lng: 12
-                    },
-                    {
-                        lat: 0,
-                        lng: 10
-                    }, {
-                        lat: 5,
-                        lng: 8
-                    }, {
-                        lat: 10,
-                        lng: 5
-                    }, {
-                        lat: 15,
-                        lng: 0
-                    },
-                    {
-                        lat: 20,
-                        lng: -5
-                    }, {
-                        lat: 25,
-                        lng: -13
-                    }, {
-                        lat: 30,
-                        lng: -12
-                    }, {
-                        lat: 35,
-                        lng: -10
-                    }
-                ],
-                asia: [{
-                        lat: 65,
-                        lng: 30
-                    }, {
-                        lat: 70,
-                        lng: 40
-                    }, {
-                        lat: 75,
-                        lng: 60
-                    }, {
-                        lat: 77,
-                        lng: 100
-                    },
-                    {
-                        lat: 75,
-                        lng: 120
-                    }, {
-                        lat: 70,
-                        lng: 140
-                    }, {
-                        lat: 65,
-                        lng: 170
-                    }, {
-                        lat: 60,
-                        lng: 170
-                    },
-                    {
-                        lat: 55,
-                        lng: 160
-                    }, {
-                        lat: 50,
-                        lng: 145
-                    }, {
-                        lat: 45,
-                        lng: 145
-                    }, {
-                        lat: 43,
-                        lng: 145
-                    },
-                    {
-                        lat: 40,
-                        lng: 140
-                    }, {
-                        lat: 35,
-                        lng: 135
-                    }, {
-                        lat: 30,
-                        lng: 130
-                    }, {
-                        lat: 25,
-                        lng: 125
-                    },
-                    {
-                        lat: 22,
-                        lng: 115
-                    }, {
-                        lat: 18,
-                        lng: 110
-                    }, {
-                        lat: 15,
-                        lng: 105
-                    }, {
-                        lat: 10,
-                        lng: 100
-                    },
-                    {
-                        lat: 5,
-                        lng: 100
-                    }, {
-                        lat: 5,
-                        lng: 95
-                    }, {
-                        lat: 8,
-                        lng: 95
-                    }, {
-                        lat: 15,
-                        lng: 80
-                    },
-                    {
-                        lat: 20,
-                        lng: 75
-                    }, {
-                        lat: 25,
-                        lng: 65
-                    }, {
-                        lat: 25,
-                        lng: 60
-                    }, {
-                        lat: 30,
-                        lng: 50
-                    },
-                    {
-                        lat: 35,
-                        lng: 45
-                    }, {
-                        lat: 40,
-                        lng: 40
-                    }, {
-                        lat: 45,
-                        lng: 40
-                    }, {
-                        lat: 50,
-                        lng: 40
-                    },
-                    {
-                        lat: 55,
-                        lng: 40
-                    }, {
-                        lat: 60,
-                        lng: 30
-                    }, {
-                        lat: 65,
-                        lng: 30
-                    }
-                ],
-                australia: [{
-                        lat: -10,
-                        lng: 112
-                    }, {
-                        lat: -12,
-                        lng: 130
-                    }, {
-                        lat: -15,
-                        lng: 135
-                    }, {
-                        lat: -12,
-                        lng: 137
-                    },
-                    {
-                        lat: -12,
-                        lng: 142
-                    }, {
-                        lat: -15,
-                        lng: 145
-                    }, {
-                        lat: -18,
-                        lng: 147
-                    }, {
-                        lat: -20,
-                        lng: 150
-                    },
-                    {
-                        lat: -25,
-                        lng: 153
-                    }, {
-                        lat: -30,
-                        lng: 153
-                    }, {
-                        lat: -35,
-                        lng: 151
-                    }, {
-                        lat: -38,
-                        lng: 145
-                    },
-                    {
-                        lat: -38,
-                        lng: 140
-                    }, {
-                        lat: -35,
-                        lng: 135
-                    }, {
-                        lat: -32,
-                        lng: 130
-                    }, {
-                        lat: -32,
-                        lng: 125
-                    },
-                    {
-                        lat: -30,
-                        lng: 115
-                    }, {
-                        lat: -25,
-                        lng: 115
-                    }, {
-                        lat: -20,
-                        lng: 115
-                    }, {
-                        lat: -15,
-                        lng: 120
-                    },
-                    {
-                        lat: -10,
-                        lng: 112
-                    }
-                ],
-                antarctica: [{
-                        lat: -65,
-                        lng: -60
-                    }, {
-                        lat: -70,
-                        lng: -30
-                    }, {
-                        lat: -72,
-                        lng: 0
-                    }, {
-                        lat: -70,
-                        lng: 30
-                    },
-                    {
-                        lat: -65,
-                        lng: 60
-                    }, {
-                        lat: -67,
-                        lng: 90
-                    }, {
-                        lat: -70,
-                        lng: 120
-                    }, {
-                        lat: -67,
-                        lng: 150
-                    },
-                    {
-                        lat: -65,
-                        lng: 180
-                    }, {
-                        lat: -67,
-                        lng: -150
-                    }, {
-                        lat: -70,
-                        lng: -120
-                    }, {
-                        lat: -67,
-                        lng: -90
-                    },
-                    {
-                        lat: -65,
-                        lng: -60
-                    }
-                ]
-            };
+        // Simplified continent outlines - fewer points but still accurate
+        const continentData = {
+          northAmerica: [
+            { lat: 83, lng: -75 },
+            { lat: 74, lng: -95 },
+            { lat: 69, lng: -130 },
+            { lat: 71, lng: -156 },
+            { lat: 60, lng: -165 },
+            { lat: 50, lng: -130 },
+            { lat: 33, lng: -118 },
+            { lat: 19, lng: -104 },
+            { lat: 16, lng: -88 },
+            { lat: 26, lng: -82 },
+            { lat: 35, lng: -75 },
+            { lat: 45, lng: -67 },
+            { lat: 59, lng: -64 },
+            { lat: 69, lng: -68 },
+            { lat: 83, lng: -75 },
+          ],
+          southAmerica: [
+            { lat: 14, lng: -83 },
+            { lat: 8, lng: -78 },
+            { lat: 12, lng: -73 },
+            { lat: 5, lng: -55 },
+            { lat: -8, lng: -35 },
+            { lat: -22, lng: -43 },
+            { lat: -34, lng: -58 },
+            { lat: -50, lng: -74 },
+            { lat: -42, lng: -73 },
+            { lat: -18, lng: -70 },
+            { lat: 0, lng: -80 },
+            { lat: 14, lng: -83 },
+          ],
+          europe: [
+            { lat: 71, lng: 25 },
+            { lat: 60, lng: 30 },
+            { lat: 45, lng: 40 },
+            { lat: 36, lng: 30 },
+            { lat: 40, lng: 19 },
+            { lat: 43, lng: 5 },
+            { lat: 43, lng: -9 },
+            { lat: 50, lng: -4 },
+            { lat: 60, lng: -5 },
+            { lat: 65, lng: -22 },
+            { lat: 72, lng: -10 },
+            { lat: 71, lng: 25 },
+          ],
+          africa: [
+            { lat: 35, lng: -10 },
+            { lat: 37, lng: 10 },
+            { lat: 30, lng: 32 },
+            { lat: 12, lng: 45 },
+            { lat: 0, lng: 42 },
+            { lat: -20, lng: 40 },
+            { lat: -34, lng: 20 },
+            { lat: -25, lng: 15 },
+            { lat: -5, lng: 12 },
+            { lat: 15, lng: 0 },
+            { lat: 35, lng: -10 },
+          ],
+          asia: [
+            { lat: 65, lng: 30 },
+            { lat: 75, lng: 60 },
+            { lat: 75, lng: 120 },
+            { lat: 65, lng: 170 },
+            { lat: 50, lng: 145 },
+            { lat: 35, lng: 135 },
+            { lat: 22, lng: 115 },
+            { lat: 10, lng: 100 },
+            { lat: 15, lng: 80 },
+            { lat: 25, lng: 60 },
+            { lat: 40, lng: 40 },
+            { lat: 65, lng: 30 },
+          ],
+          australia: [
+            { lat: -10, lng: 112 },
+            { lat: -12, lng: 130 },
+            { lat: -15, lng: 145 },
+            { lat: -25, lng: 153 },
+            { lat: -38, lng: 145 },
+            { lat: -35, lng: 115 },
+            { lat: -20, lng: 115 },
+            { lat: -10, lng: 112 },
+          ],
+          antarctica: [
+            { lat: -65, lng: -60 },
+            { lat: -72, lng: 0 },
+            { lat: -65, lng: 60 },
+            { lat: -70, lng: 120 },
+            { lat: -65, lng: 180 },
+            { lat: -70, lng: -120 },
+            { lat: -65, lng: -60 },
+          ],
+        };
 
-            // Create ocean dots (thinner)
-            for (let i = 0; i < oceanDotCount; i++) {
-                // Use spherical coordinates to position dots
-                const phi = Math.acos(-1 + (2 * i) / oceanDotCount);
-                const theta = Math.sqrt(oceanDotCount * Math.PI) * phi;
+        // Create ocean dots (thinner)
+        for (let i = 0; i < oceanDotCount; i++) {
+          // Use spherical coordinates to position dots
+          const phi = Math.acos(-1 + (2 * i) / oceanDotCount);
+          const theta = Math.sqrt(oceanDotCount * Math.PI) * phi;
 
-                // Convert to Cartesian coordinates
-                const x = radius * Math.sin(phi) * Math.cos(theta);
-                const y = radius * Math.sin(phi) * Math.sin(theta);
-                const z = radius * Math.cos(phi);
+          // Convert to Cartesian coordinates
+          const x = radius * Math.sin(phi) * Math.cos(theta);
+          const y = radius * Math.sin(phi) * Math.sin(theta);
+          const z = radius * Math.cos(phi);
 
-                const dot = document.createElement('div');
-                dot.className = 'dot ocean-dot';
-                dot.style.transform = `translate3d(${x + radius - 1}px, ${y + radius - 1}px, ${z}px)`;
+          const dot = document.createElement("div");
+          dot.className = "dot ocean-dot";
+          dot.style.transform = `translate3d(${x + radius - 1}px, ${
+            y + radius - 1
+          }px, ${z}px)`;
 
-                // Vary the opacity based on z-coordinate to create depth
-                const opacity = 0.2 + 0.4 * (z + radius) / (2 * radius);
-                dot.style.opacity = opacity;
+          // Vary the opacity based on z-coordinate to create depth
+          const opacity = 0.2 + (0.4 * (z + radius)) / (2 * radius);
+          dot.style.opacity = opacity;
 
-                globe.appendChild(dot);
+          globe.appendChild(dot);
+        }
+
+        // Function to create a smooth curve between two points
+        function createSmoothCurve(points, steps) {
+          const curvePoints = [];
+
+          for (let i = 0; i < points.length - 1; i++) {
+            const p0 = points[i];
+            const p1 = points[i + 1];
+
+            for (let step = 0; step < steps; step++) {
+              const t = step / steps;
+              const lat = p0.lat + (p1.lat - p0.lat) * t;
+              const lng = p0.lng + (p1.lng - p0.lng) * t;
+              curvePoints.push({ lat, lng });
             }
+          }
 
-            // Function to create a smooth curve between two points using Bezier interpolation
-            function createSmoothCurve(points, steps) {
-                const curvePoints = [];
+          // Close the loop if needed
+          if (
+            points.length > 2 &&
+            (points[0].lat !== points[points.length - 1].lat ||
+              points[0].lng !== points[points.length - 1].lng)
+          ) {
+            const p0 = points[points.length - 1];
+            const p1 = points[0];
 
-                for (let i = 0; i < points.length - 1; i++) {
-                    const p0 = points[i];
-                    const p1 = points[i + 1];
-
-                    for (let step = 0; step < steps; step++) {
-                        const t = step / steps;
-                        const lat = p0.lat + (p1.lat - p0.lat) * t;
-                        const lng = p0.lng + (p1.lng - p0.lng) * t;
-                        curvePoints.push({
-                            lat,
-                            lng
-                        });
-                    }
-                }
-
-                // Close the loop if needed
-                if (points.length > 2 &&
-                    (points[0].lat !== points[points.length - 1].lat ||
-                        points[0].lng !== points[points.length - 1].lng)) {
-                    const p0 = points[points.length - 1];
-                    const p1 = points[0];
-
-                    for (let step = 0; step < steps; step++) {
-                        const t = step / steps;
-                        const lat = p0.lat + (p1.lat - p0.lat) * t;
-                        const lng = p0.lng + (p1.lng - p0.lng) * t;
-                        curvePoints.push({
-                            lat,
-                            lng
-                        });
-                    }
-                }
-
-                return curvePoints;
+            for (let step = 0; step < steps; step++) {
+              const t = step / steps;
+              const lat = p0.lat + (p1.lat - p0.lat) * t;
+              const lng = p0.lng + (p1.lng - p0.lng) * t;
+              curvePoints.push({ lat, lng });
             }
+          }
 
-            // Create continent outline dots with smoother curves
-            Object.entries(continentData).forEach(([continentName, points]) => {
-                // Create smooth curve with more points
-                const smoothPoints = createSmoothCurve(points, 5);
+          return curvePoints;
+        }
 
-                // Create dots along the smooth curve
-                smoothPoints.forEach(point => {
-                    // Convert lat/lng to 3D coordinates
-                    const phi = (90 - point.lat) * (Math.PI / 180);
-                    const theta = (point.lng + 180) * (Math.PI / 180);
+        // Create continent outline dots with smoother curves
+        Object.entries(continentData).forEach(([continentName, points]) => {
+          // Create smooth curve with more points
+          const smoothPoints = createSmoothCurve(points, 8);
 
-                    const x = -radius * Math.sin(phi) * Math.cos(theta);
-                    const y = radius * Math.cos(phi);
-                    const z = radius * Math.sin(phi) * Math.sin(theta);
+          // Create dots along the smooth curve
+          smoothPoints.forEach((point) => {
+            // Convert lat/lng to 3D coordinates
+            const phi = (90 - point.lat) * (Math.PI / 180);
+            const theta = (point.lng + 180) * (Math.PI / 180);
 
-                    const dot = document.createElement('div');
-                    dot.className = 'dot continent-dot';
-                    dot.style.transform = `translate3d(${x + radius - 2}px, ${y + radius - 2}px, ${z}px)`;
+            const x = -radius * Math.sin(phi) * Math.cos(theta);
+            const y = radius * Math.cos(phi);
+            const z = radius * Math.sin(phi) * Math.sin(theta);
 
-                    // Adjust opacity based on z-coordinate for depth
-                    const opacity = 0.6 + 0.4 * (z + radius) / (2 * radius);
-                    dot.style.opacity = opacity;
+            const dot = document.createElement("div");
+            dot.className = "dot continent-dot";
+            dot.style.transform = `translate3d(${x + radius - 2}px, ${
+              y + radius - 2
+            }px, ${z}px)`;
 
-                    globe.appendChild(dot);
-                });
+            // Adjust opacity based on z-coordinate for depth
+            const opacity = 0.6 + (0.4 * (z + radius)) / (2 * radius);
+            dot.style.opacity = opacity;
 
-                // Fill in some additional dots within continents for a more solid appearance
-                if (continentName !== 'antarctica') { // Skip Antarctica for a cleaner look
-                    const centerPoints = [];
-                    for (let i = 0; i < points.length - 2; i += 2) {
-                        const p0 = points[i];
-                        const p2 = points[i + 2];
-                        centerPoints.push({
-                            lat: (p0.lat + p2.lat) / 2,
-                            lng: (p0.lng + p2.lng) / 2
-                        });
-                    }
-
-                    centerPoints.forEach(point => {
-                        // Convert lat/lng to 3D coordinates
-                        const phi = (90 - point.lat) * (Math.PI / 180);
-                        const theta = (point.lng + 180) * (Math.PI / 180);
-
-                        const x = -radius * Math.sin(phi) * Math.cos(theta);
-                        const y = radius * Math.cos(phi);
-                        const z = radius * Math.sin(phi) * Math.sin(theta);
-
-                        const dot = document.createElement('div');
-                        dot.className = 'dot continent-dot';
-                        dot.style.transform = `translate3d(${x + radius - 2}px, ${y + radius - 2}px, ${z}px)`;
-
-                        // Adjust opacity based on z-coordinate for depth
-                        const opacity = 0.5 + 0.3 * (z + radius) / (2 * radius);
-                        dot.style.opacity = opacity;
-
-                        globe.appendChild(dot);
-                    });
-                }
-            });
-
-            // Add major cities around the world
-            const locations = [{
-                    name: "New York",
-                    lat: 40.7128,
-                    lng: -74.0060
-                },
-                {
-                    name: "London",
-                    lat: 51.5074,
-                    lng: -0.1278
-                },
-                {
-                    name: "Tokyo",
-                    lat: 35.6762,
-                    lng: 139.6503
-                },
-                {
-                    name: "Sydney",
-                    lat: -33.8688,
-                    lng: 151.2093
-                },
-                {
-                    name: "Rio de Janeiro",
-                    lat: -22.9068,
-                    lng: -43.1729
-                },
-                {
-                    name: "Cape Town",
-                    lat: -33.9249,
-                    lng: 18.4241
-                },
-                {
-                    name: "Moscow",
-                    lat: 55.7558,
-                    lng: 37.6173
-                },
-                {
-                    name: "Dubai",
-                    lat: 25.2048,
-                    lng: 55.2708
-                },
-                {
-                    name: "Singapore",
-                    lat: 1.3521,
-                    lng: 103.8198
-                },
-                {
-                    name: "Mumbai",
-                    lat: 19.0760,
-                    lng: 72.8777
-                },
-                {
-                    name: "Beijing",
-                    lat: 39.9042,
-                    lng: 116.4074
-                },
-                {
-                    name: "Paris",
-                    lat: 48.8566,
-                    lng: 2.3522
-                },
-                {
-                    name: "Cairo",
-                    lat: 30.0444,
-                    lng: 31.2357
-                },
-                {
-                    name: "Mexico City",
-                    lat: 19.4326,
-                    lng: -99.1332
-                },
-                {
-                    name: "Berlin",
-                    lat: 52.5200,
-                    lng: 13.4050
-                },
-                {
-                    name: "Toronto",
-                    lat: 43.6532,
-                    lng: -79.3832
-                },
-                {
-                    name: "Bangkok",
-                    lat: 13.7563,
-                    lng: 100.5018
-                },
-                {
-                    name: "Buenos Aires",
-                    lat: -34.6037,
-                    lng: -58.3816
-                }
-            ];
-
-            locations.forEach((location, index) => {
-                // Convert lat/lng to 3D coordinates
-                const phi = (90 - location.lat) * (Math.PI / 180);
-                const theta = (location.lng + 180) * (Math.PI / 180);
-
-                const x = -radius * Math.sin(phi) * Math.cos(theta);
-                const y = radius * Math.cos(phi);
-                const z = radius * Math.sin(phi) * Math.sin(theta);
-
-                const pointer = document.createElement('div');
-                pointer.className = 'pointer';
-                pointer.style.transform = `translate3d(${x + radius}px, ${y + radius}px, ${z}px)`;
-
-                // Add delay to each pointer's animation
-                pointer.style.animationDelay = `${index * 0.3}s`;
-
-                const pointerDot = document.createElement('div');
-                pointerDot.className = 'pointer-dot';
-
-                const pointerPulse = document.createElement('div');
-                pointerPulse.className = 'pointer-pulse';
-                pointerPulse.style.animationDelay = `${index * 0.3}s`;
-
-                const label = document.createElement('div');
-                label.className = 'pointer-label';
-                label.textContent = location.name;
-
-                pointer.appendChild(pointerDot);
-                pointer.appendChild(pointerPulse);
-                pointer.appendChild(label);
-                globe.appendChild(pointer);
-            });
+            globe.appendChild(dot);
+          });
         });
-    </script>
-    
-</body>
 
+        // Add major cities around the world - reduced number for better performance
+        const locations = [
+          { name: "New York", lat: 40.7128, lng: -74.006 },
+          { name: "London", lat: 51.5074, lng: -0.1278 },
+          { name: "Tokyo", lat: 35.6762, lng: 139.6503 },
+          { name: "Sydney", lat: -33.8688, lng: 151.2093 },
+          { name: "Rio", lat: -22.9068, lng: -43.1729 },
+          { name: "Cairo", lat: 30.0444, lng: 31.2357 },
+          { name: "Singapore", lat: 1.3521, lng: 103.8198 },
+          { name: "Moscow", lat: 55.7558, lng: 37.6173 },
+          { name: "Beijing", lat: 39.9042, lng: 116.4074 },
+        ];
+
+        locations.forEach((location, index) => {
+          // Convert lat/lng to 3D coordinates
+          const phi = (90 - location.lat) * (Math.PI / 180);
+          const theta = (location.lng + 180) * (Math.PI / 180);
+
+          const x = -radius * Math.sin(phi) * Math.cos(theta);
+          const y = radius * Math.cos(phi);
+          const z = radius * Math.sin(phi) * Math.sin(theta);
+
+          const pointer = document.createElement("div");
+          pointer.className = "pointer";
+          pointer.style.transform = `translate3d(${x + radius}px, ${
+            y + radius
+          }px, ${z}px)`;
+
+          const pointerDot = document.createElement("div");
+          pointerDot.className = "pointer-dot";
+
+          const label = document.createElement("div");
+          label.className = "pointer-label";
+          label.textContent = location.name;
+
+          pointer.appendChild(pointerDot);
+          pointer.appendChild(label);
+          globe.appendChild(pointer);
+        });
+      });
+    </script>
+    <script>
+      (function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document;
+          if (b) {
+            var d = b.createElement("script");
+            d.innerHTML =
+              "window.__CF$cv$params={r:'94227e6355bb8657',t:'MTc0NzY0NjE2Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName("head")[0].appendChild(d);
+          }
+        }
+        if (document.body) {
+          var a = document.createElement("iframe");
+          a.height = 1;
+          a.width = 1;
+          a.style.position = "absolute";
+          a.style.top = 0;
+          a.style.left = 0;
+          a.style.border = "none";
+          a.style.visibility = "hidden";
+          document.body.appendChild(a);
+          if ("loading" !== document.readyState) c();
+          else if (window.addEventListener)
+            document.addEventListener("DOMContentLoaded", c);
+          else {
+            var e = document.onreadystatechange || function () {};
+            document.onreadystatechange = function (b) {
+              e(b);
+              "loading" !== document.readyState &&
+                ((document.onreadystatechange = e), c());
+            };
+          }
+        }
+      })();
+    </script>
+  </body>
 </html>
